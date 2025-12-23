@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>EasyInvoice - Professional Generator</title>
+		<link rel="stylesheet" href="style.css" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+	</head>
+	<body>
+		<header>
+			<div class="logo-text">Easy<span>Invoice</span></div>
+			<div class="header-actions">
+				<button class="btn btn-secondary" onclick="resetForm()">
+					<svg
+						width="16"
+						height="16"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+						></path>
+					</svg>
+					Reset Form
+				</button>
+				<button class="btn btn-primary" onclick="downloadPDF()">
+					<svg
+						width="18"
+						height="18"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+						></path>
+					</svg>
+					Download PDF
+				</button>
+			</div>
+		</header>
+
+		<main>
+			<div class="editor">
+				<div class="section-title">Branding</div>
+				<div class="file-upload-container">
+					<div class="file-upload" onclick="triggerUpload()">
+						<span id="uploadText">Click to upload Logo (Optional)</span>
+						<input
+							type="file"
+							id="logoInput"
+							accept="image/*"
+							style="display: none"
+							onchange="handleLogoUpload(event)"
+						/>
+					</div>
+					<div class="file-actions" id="logoActions">
+						<button class="link-btn text-primary" onclick="triggerUpload()">
+							Replace
+						</button>
+						<span style="color: #ccc">|</span>
+						<button class="link-btn text-danger" onclick="removeLogo()">
+							Remove
+						</button>
+					</div>
+				</div>
+
+				<div class="section-title">Invoice Details</div>
+				<div class="row">
+					<div class="input-group" style="flex: 1">
+						<label>Number</label>
+						<input
+							type="text"
+							id="inNumber"
+							value="#INV-001"
+							oninput="updateInvoice()"
+						/>
+					</div>
+					<div class="input-group" style="flex: 1">
+						<label>Date</label>
+						<input type="date" id="inDate" oninput="updateInvoice()" />
+					</div>
+				</div>
+
+				<div class="section-title">From (Business)</div>
+				<div class="input-group">
+					<input
+						type="text"
+						id="fromName"
+						placeholder="Business Name"
+						oninput="updateInvoice()"
+					/>
+				</div>
+				<div class="input-group">
+					<textarea
+						id="fromAddress"
+						rows="2"
+						placeholder="Address (Optional)"
+						oninput="updateInvoice()"
+					></textarea>
+				</div>
+				<div class="input-group">
+					<input
+						type="text"
+						id="fromPhone"
+						placeholder="Phone / Email (Optional)"
+						oninput="updateInvoice()"
+					/>
+				</div>
+
+				<div class="section-title">To (Client)</div>
+				<div class="input-group">
+					<input
+						type="text"
+						id="toName"
+						placeholder="Client Name"
+						oninput="updateInvoice()"
+					/>
+				</div>
+				<div class="input-group">
+					<textarea
+						id="toAddress"
+						rows="2"
+						placeholder="Client Address (Optional)"
+						oninput="updateInvoice()"
+					></textarea>
+				</div>
+				<div class="input-group">
+					<input
+						type="text"
+						id="toPhone"
+						placeholder="Client Phone / Email (Optional)"
+						oninput="updateInvoice()"
+					/>
+				</div>
+
+				<div class="section-title">Line Items</div>
+				<div id="items-list"></div>
+				<button class="add-btn" onclick="addItem()">+ Add Item</button>
+
+				<div class="section-title">Notes & Terms</div>
+				<div class="input-group">
+					<textarea
+						id="notes"
+						rows="3"
+						placeholder="Payment terms, thank you note, etc."
+						oninput="updateInvoice()"
+					></textarea>
+				</div>
+
+				<div class="section-title">Settings</div>
+				<div class="row">
+					<div class="input-group" style="flex: 1">
+						<label>Tax %</label>
+						<input
+							type="number"
+							id="taxRate"
+							value="0"
+							oninput="updateInvoice()"
+						/>
+					</div>
+					<div class="input-group" style="flex: 1">
+						<label>Currency</label>
+						<select id="currency" onchange="updateInvoice()">
+							<option value="$">$ (USD)</option>
+							<option value="€">€ (EUR)</option>
+							<option value="£">£ (GBP)</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="legal-box">
+					<strong>🔒 Privacy & Data Policy</strong>
+					<p style="margin: 0">
+						This tool operates 100% in your browser. No data (invoices, client
+						names, or amounts) is ever sent to our servers or stored by us. When
+						you refresh the page, all data is deleted.
+					</p>
+					<p style="margin: 8px 0 0 0">
+						<strong>Disclaimer:</strong> This tool is provided "as is" without
+						warranty. Verify all tax calculations and legal requirements for
+						your specific jurisdiction before sending.
+					</p>
+				</div>
+			</div>
+
+			<div class="preview-area">
+				<div id="invoice-paper">
+					<div class="inv-top">
+						<div class="inv-logo-box">
+							<img id="prev-logo" src="" alt="Logo" />
+							<div id="prev-from-section">
+								<p class="inv-bold" id="prev-from-name">Your Business</p>
+								<p
+									class="inv-text"
+									id="prev-from-address"
+									style="white-space: pre-line"
+								></p>
+								<p class="inv-text" id="prev-from-phone"></p>
+							</div>
+						</div>
+						<div>
+							<h1 class="inv-title">INVOICE</h1>
+							<div class="inv-number">
+								<span id="prev-number">#INV-001</span><br />
+								<span id="prev-date">2025-12-22</span>
+							</div>
+						</div>
+					</div>
+
+					<div class="inv-addresses">
+						<div class="inv-col">
+							<div class="inv-label">Bill To:</div>
+							<p class="inv-bold" id="prev-to-name">Client Name</p>
+							<p
+								class="inv-text"
+								id="prev-to-address"
+								style="white-space: pre-line"
+							></p>
+							<p class="inv-text" id="prev-to-phone"></p>
+						</div>
+					</div>
+
+					<table class="inv-table">
+						<thead>
+							<tr>
+								<th style="width: 50%">Description</th>
+								<th class="text-right w-qty">Qty</th>
+								<th class="text-right w-price">Price</th>
+								<th class="text-right w-total">Total</th>
+							</tr>
+						</thead>
+						<tbody id="prev-items"></tbody>
+					</table>
+
+					<div class="inv-footer-layout">
+						<div class="inv-notes">
+							<div class="inv-label">Notes</div>
+							<p
+								class="inv-text"
+								id="prev-notes"
+								style="white-space: pre-line; color: #64748b"
+							></p>
+						</div>
+						<div class="inv-totals-box">
+							<div class="inv-total-row">
+								<span>Subtotal</span><span id="prev-subtotal">$0.00</span>
+							</div>
+							<div class="inv-total-row">
+								<span>Tax (<span id="prev-tax-rate">0</span>%)</span
+								><span id="prev-tax-amt">$0.00</span>
+							</div>
+							<div class="inv-total-row inv-grand-total">
+								<span>Total</span><span id="prev-total">$0.00</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+		<script src="script.js"></script>
+	</body>
+</html>
